@@ -14,6 +14,8 @@ export interface CourseFormData {
   thumbnail: string;
   enrolledCount: number;
   rating: number;
+  syllabus: string;
+  bibliography: string;
 }
 
 const defaultFormData: CourseFormData = {
@@ -24,6 +26,8 @@ const defaultFormData: CourseFormData = {
   thumbnail: "/placeholder.svg",
   enrolledCount: 0,
   rating: 0,
+  syllabus: "",
+  bibliography: "",
 };
 
 export function useCourseManagement() {
@@ -139,6 +143,8 @@ export function useCourseManagement() {
       thumbnail: course.thumbnail,
       enrolledCount: course.enrolledCount,
       rating: course.rating,
+      syllabus: course.syllabus || "",
+      bibliography: course.bibliography || "",
     });
     setEditingCourseId(course.id);
     setIsDialogOpen(true);

@@ -15,7 +15,6 @@ const CourseCatalog = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [enrollingCourseId, setEnrollingCourseId] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -33,31 +32,6 @@ const CourseCatalog = () => {
 
     fetchCourses();
   }, []);
-
-  const handleEnroll = async (courseId: string) => {
-    if (!user) {
-      toast.error("Você precisa estar logado para se matricular");
-      return;
-    }
-
-    setEnrollingCourseId(courseId);
-    try {
-      const result = await courseService.enrollCourse(courseId, user.id);
-      if (result.success) {
-        toast.success(result.message);
-        setCourses(courses.map(course => 
-          course.id === courseId ? { ...course, isEnrolled: true } : course
-        ));
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      console.error("Error enrolling in course:", error);
-      toast.error("Erro ao realizar matrícula");
-    } finally {
-      setEnrollingCourseId(null);
-    }
-  };
 
   const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -130,18 +104,10 @@ const CourseCatalog = () => {
                   <Link to={`/courses/${course.id}`} className="w-full">
                     <Button variant="outline" className="w-full">Ver Detalhes</Button>
                   </Link>
-                  {course.isEnrolled ? (
+                  {course.isEnrolled && (
                     <Link to={`/courses/${course.id}/content`} className="w-full">
                       <Button className="w-full">Continuar Curso</Button>
                     </Link>
-                  ) : (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => handleEnroll(course.id)}
-                      disabled={enrollingCourseId === course.id}
-                    >
-                      {enrollingCourseId === course.id ? "Matriculando..." : "Matricular-se"}
-                    </Button>
                   )}
                 </CardFooter>
               </Card>

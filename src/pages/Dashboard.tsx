@@ -4,9 +4,9 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Course, Certificate } from "@/types";
-import { courseService, certificateService } from "@/services/api";
-import { BookOpen, Award, GraduationCap, Loader2, AlertTriangle } from "lucide-react";
+import { Course, Certificate, Announcement } from "@/types";
+import { courseService, certificateService, announcementService } from "@/services/api";
+import { BookOpen, Award, GraduationCap, Loader2, AlertTriangle, Megaphone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { BotaoForcarCertificado } from "@/components/BotaoForcarCertificado";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const handleNavigateToCourses = () => {
@@ -51,15 +52,17 @@ const Dashboard = () => {
           console.time('dashboard-load');
           
           // Carregar dados em paralelo para melhorar a performance
-          const [enrolledCoursesData, certificatesData] = await Promise.all([
+          const [enrolledCoursesData, certificatesData, announcementsData] = await Promise.all([
             courseService.getEnrolledCourses(user.id),
-            certificateService.getCertificates(user.id)
+            certificateService.getCertificates(user.id),
+            announcementService.getAnnouncementsForUser(user.id)
           ]);
           
           // Verificar se o componente ainda está montado antes de atualizar o estado
           if (isMounted) {
             setEnrolledCourses(enrolledCoursesData);
             setCertificates(certificatesData);
+            setAnnouncements(announcementsData);
             console.timeEnd('dashboard-load');
           }
         }
@@ -147,6 +150,29 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Announcements Section */}
+      {announcements.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold tracking-tight">Avisos Recentes</h2>
+          <Card>
+            <CardContent className="p-6 space-y-4">
+              {announcements.slice(0, 3).map(announcement => (
+                <div key={announcement.id} className="p-4 border rounded-md">
+                  <div className="flex items-center gap-2">
+                    <Megaphone className="h-5 w-5 text-primary" />
+                    <h3 className="font-bold">{announcement.title}</h3>
+                  </div>
+                  <p className="mt-2 text-muted-foreground">{announcement.content}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {new Date(announcement.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* My Courses Section */}
       <div className="space-y-4" id="my-courses">

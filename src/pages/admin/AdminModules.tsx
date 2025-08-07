@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, MoreHorizontal, Edit, Trash, BookOpen } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash, BookOpen, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Course, Module } from "@/types";
 import { courseService } from "@/services/api";
@@ -45,6 +45,7 @@ import { useAppData } from "@/contexts/AppDataContext";
 import { supabase } from "@/integrations/supabase/client";
 
 const AdminModules = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const coursePrefillId = queryParams.get("courseId");
@@ -321,6 +322,13 @@ const AdminModules = () => {
                               >
                                 <BookOpen className="h-4 w-4" />
                                 Gerenciar Aulas
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => navigate(`/admin/module/${module.id}/quiz`)}
+                                className="flex items-center gap-2"
+                              >
+                                <HelpCircle className="h-4 w-4" />
+                                Gerenciar Quiz
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

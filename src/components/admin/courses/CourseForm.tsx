@@ -18,6 +18,8 @@ interface CourseFormProps {
     instructor: string;
     duration: string;
     thumbnail: string;
+    syllabus: string;
+    bibliography: string;
   };
   handleInputChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -108,6 +110,28 @@ const CourseForm = ({
               id="description"
               name="description"
               value={formData.description}
+              onChange={handleInputChange}
+              rows={5}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="syllabus">Ementa</Label>
+            <Textarea
+              id="syllabus"
+              name="syllabus"
+              value={formData.syllabus}
+              onChange={handleInputChange}
+              rows={5}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bibliography">Bibliografia</Label>
+            <Textarea
+              id="bibliography"
+              name="bibliography"
+              value={formData.bibliography}
               onChange={handleInputChange}
               rows={5}
             />
