@@ -617,6 +617,50 @@ const courseService = {
       console.error('Erro ao buscar cursos pendentes:', error);
       throw new Error('Erro ao buscar cursos pendentes');
     }
+  },
+
+  async getClassesForCourse(courseId: string): Promise<Class[]> {
+    if (!courseId) throw new Error('Course ID is required');
+
+    try {
+      const { data, error } = await supabase
+        .from('classes')
+        .select('*')
+        .eq('course_id', courseId);
+
+      if (error) throw error;
+
+      return data.map(c => ({
+          id: c.id,
+          courseId: c.course_id,
+          name: c.name,
+          instructorId: c.instructor_id || undefined,
+          startDate: c.start_date || undefined,
+          endDate: c.end_date || undefined,
+          createdAt: c.created_at,
+          updatedAt: c.updated_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching classes for course:', error);
+      throw new Error('Failed to fetch classes for course');
+    }
+  },
+
+  async getDocumentsForCourse(courseId: string): Promise<any[]> {
+    if (!courseId) throw new Error('Course ID is required');
+
+    try {
+      const { data, error } = await supabase
+        .from('course_documents')
+        .select('*')
+        .eq('course_id', courseId);
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching documents for course:', error);
+      throw new Error('Failed to fetch documents for course');
+    }
   }
 };
 

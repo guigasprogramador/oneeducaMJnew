@@ -47,6 +47,13 @@ import CourseModules from "./pages/professor/CourseModules";
 import ProfessorLessons from "./pages/professor/ProfessorLessons";
 import Forum from "./pages/professor/Forum";
 import CourseApproval from "./pages/admin/CourseApproval";
+import QuizBuilder from "./pages/admin/QuizBuilder";
+import QuizResults from "./pages/admin/QuizResults";
+import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
+import Calendar from "./pages/Calendar";
+import AdminClasses from "./pages/admin/AdminClasses";
+import ClassEventManager from "./pages/admin/ClassEventManager";
+import FormBuilder from "./pages/admin/FormBuilder";
 import NotFound from "./pages/NotFound";
 
 // Usando o queryClient global definido em utils/queryClient.ts
@@ -100,6 +107,7 @@ const App = () => (
                 <Route path="/aluno/certificados" element={<MeusCertificados />} />
                 <Route path="/certificates/:certificateId" element={<Certificate />} />
                 <Route path="/aluno/certificado/:certificateId" element={<Certificate />} />
+                <Route path="/calendar" element={<Calendar />} />
               </Route>
               
               {/* Professor routes */}
@@ -133,6 +141,12 @@ const App = () => (
                 <Route path="/admin/course-approval" element={<CourseApproval />} />
                 <Route path="/admin/forum" element={<AdminForum />} />
                 <Route path="/admin/gerenciador-certificados" element={<GerenciadorCertificados />} />
+                <Route path="/admin/module/:moduleId/quiz" element={<QuizBuilder />} />
+                <Route path="/admin/module/:moduleId/quiz/results" element={<QuizResults />} />
+                <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+                <Route path="/admin/course/:courseId/classes" element={<AdminClasses />} />
+                <Route path="/admin/class/:classId/events" element={<ClassEventManager />} />
+                <Route path="/admin/course/:courseId/form" element={<FormBuilder />} />
               </Route>
               
               {/* 404 page */}

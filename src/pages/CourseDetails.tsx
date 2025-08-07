@@ -9,59 +9,53 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useAuth } from "@/contexts/AuthContext";
 import { Course } from "@/types";
 import { courseService } from "@/services";
-import { enrollCourse, getEnrolledCourses, checkEnrollment } from "@/services/courses/enrollmentService";
-import { GraduationCap, Clock, Users, BookOpen, Play } from "lucide-react";
+import { enrollClass, getEnrolledCourses, checkEnrollment } from "@/services/courses/enrollmentService";
+import { GraduationCap, Clock, Users, BookOpen, Play, CalendarIcon, FileText } from "lucide-react";
 import { toast } from "sonner";
 import LoadingWithFeedback from "@/components/LoadingWithFeedback";
-import { supabase } from "@/integrations/supabase/client";
+import { Class, CourseDocument, CustomForm } from "@/types";
+import { formService } from "@/services/formService";
+import EnrollmentForm from "@/components/EnrollmentForm";
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
+  const [classes, setClasses] = useState<Class[]>([]);
+  const [documents, setDocuments] = useState<CourseDocument[]>([]);
+  const [customForm, setCustomForm] = useState<CustomForm | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [isEnrolling, setIsEnrolling] = useState<string | null>(null); // Store classId being enrolled
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [selectedClassForEnrollment, setSelectedClassForEnrollment] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCourse = async () => {
+    const fetchCourseData = async () => {
+      if (!courseId) return;
+      setIsLoading(true);
       try {
-        if (courseId) {
-          console.log(`DIAGNÓSTICO: Buscando detalhes do curso ${courseId}`);
-          const courseData = await courseService.getCourseById(courseId);
-          setCourse(courseData);
-          console.log('DIAGNÓSTICO: Dados do curso carregados:', courseData?.title);
-          
-          // Verificar se o usuário está matriculado no curso
-          if (user) {
-            console.log(`DIAGNÓSTICO: Verificando matrícula do usuário ${user.id} no curso ${courseId}`);
-            
-            try {
-              // Verificar diretamente no Supabase se o usuário está matriculado
-              const { data, error } = await checkEnrollment(courseId, user.id);
-              
-              if (error) {
-                console.error('DIAGNÓSTICO: Erro ao verificar matrícula diretamente:', error);
-                // Tentar método alternativo
-                const enrolledCourses = await getEnrolledCourses(user.id);
-                const isUserEnrolled = enrolledCourses.some(course => course.id === courseId);
-                console.log(`DIAGNÓSTICO: Verificando com lista de cursos - Matriculado: ${isUserEnrolled}`);
-                setIsEnrolled(isUserEnrolled);
-              } else {
-                const isUserEnrolled = !!data;
-                console.log(`DIAGNÓSTICO: Verificar matrícula direta - Matriculado: ${isUserEnrolled}`);
-                setIsEnrolled(isUserEnrolled);
-              }
-            } catch (enrollError) {
-              console.error("DIAGNÓSTICO: Erro ao verificar matrícula:", enrollError);
-              // Se houver erro, assumimos que o usuário não está matriculado
-              setIsEnrolled(false);
-            }
-          }
+        const courseData = await courseService.getCourseById(courseId);
+        setCourse(courseData);
+
+        if (courseData) {
+          const [classesData, documentsData, formData] = await Promise.all([
+            courseService.getClassesForCourse(courseId),
+            courseService.getDocumentsForCourse(courseId),
+            formService.getFormForCourse(courseId),
+          ]);
+          setClasses(classesData);
+          setDocuments(documentsData.map(d => ({...d, documentName: d.document_name, documentUrl: d.document_url, courseId: d.course_id, createdAt: d.created_at})));
+          setCustomForm(formData);
+        }
+
+        if (user) {
+          const { data } = await checkEnrollment(courseId, user.id);
+          setIsEnrolled(!!data);
         }
       } catch (error) {
-        console.error("DIAGNÓSTICO: Error fetching course:", error);
+        console.error("Error fetching course data:", error);
         toast.error("Erro ao carregar detalhes do curso");
         navigate("/courses");
       } finally {
@@ -69,38 +63,40 @@ const CourseDetails = () => {
       }
     };
 
-    fetchCourse();
+    fetchCourseData();
   }, [courseId, navigate, user]);
 
-  const handleEnroll = async () => {
+  const handleEnroll = async (classId: string) => {
     if (!user) {
       navigate("/login");
       return;
     }
 
-    setIsEnrolling(true);
-    try {
-      if (courseId) {
-        const result = await enrollCourse(courseId, user.id);
-        
+    if (customForm) {
+      setSelectedClassForEnrollment(classId);
+      setIsFormModalOpen(true);
+    } else {
+      setIsEnrolling(classId);
+      try {
+        const result = await enrollClass(classId, user.id);
         if (result.success) {
           setIsEnrolled(true);
           toast.success(result.message || "Matrícula realizada com sucesso!");
         } else {
           toast.error(result.message || "Erro ao realizar matrícula");
         }
+      } catch (error) {
+        console.error("Error enrolling in class:", error);
+        toast.error("Erro ao realizar matrícula");
+      } finally {
+        setIsEnrolling(null);
       }
-    } catch (error) {
-      console.error("Error enrolling in course:", error);
-      toast.error("Erro ao realizar matrícula");
-    } finally {
-      setIsEnrolling(false);
     }
   };
 
   const startCourse = () => {
     if (courseId) {
-      // Redirecionar para o player de aulas em vez da pu00e1gina de conteu00fado
+      // This might need to be adapted to a class-specific player later
       navigate(`/aluno/curso/${courseId}/player`);
     }
   };
@@ -171,13 +167,35 @@ const CourseDetails = () => {
                   Continuar Curso
                 </Button>
               ) : (
-                <Button
-                  className="w-full"
-                  onClick={handleEnroll}
-                  disabled={isEnrolling}
-                >
-                  {isEnrolling ? "Matriculando..." : "Matricular-se"}
-                </Button>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">Turmas Disponíveis</h3>
+                  {classes.length > 0 ? (
+                    classes.map((cls) => (
+                      <Card key={cls.id} className="p-4">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{cls.name}</p>
+                            {cls.startDate && (
+                              <p className="text-sm text-muted-foreground">
+                                Início em: {new Date(cls.startDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                          <Button
+                            onClick={() => handleEnroll(cls.id)}
+                            disabled={isEnrolling === cls.id}
+                          >
+                            {isEnrolling === cls.id ? 'Matriculando...' : 'Matricular-se'}
+                          </Button>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-muted-foreground">
+                      Não há turmas abertas para este curso no momento.
+                    </p>
+                  )}
+                </div>
               )}
               
               <div className="flex justify-between items-center mt-4">
@@ -200,6 +218,7 @@ const CourseDetails = () => {
         <TabsList>
           <TabsTrigger value="modules">Conteúdo do Curso</TabsTrigger>
           <TabsTrigger value="description">Sobre o Curso</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
         </TabsList>
         
         <TabsContent value="modules" className="space-y-4 mt-4">
@@ -245,23 +264,56 @@ const CourseDetails = () => {
           <h2 className="text-2xl font-semibold">Sobre o Curso</h2>
           <div className="prose max-w-none">
             <p>{course.description}</p>
-            <h3 className="text-xl font-medium mt-4">O que você vai aprender</h3>
-            <ul>
-              <li>Entender os conceitos fundamentais</li>
-              <li>Aplicar técnicas avançadas</li>
-              <li>Desenvolver projetos práticos</li>
-              <li>Construir um portfólio profissional</li>
-            </ul>
             
-            <h3 className="text-xl font-medium mt-4">Requisitos</h3>
-            <ul>
-              <li>Conhecimentos básicos na área</li>
-              <li>Computador com acesso à internet</li>
-              <li>Vontade de aprender e praticar</li>
-            </ul>
+            {course.syllabus && (
+              <>
+                <h3 className="text-xl font-medium mt-4">Ementa</h3>
+                <p>{course.syllabus}</p>
+              </>
+            )}
+
+            {course.bibliography && (
+              <>
+                <h3 className="text-xl font-medium mt-4">Bibliografia</h3>
+                <p>{course.bibliography}</p>
+              </>
+            )}
           </div>
         </TabsContent>
+
+        <TabsContent value="documents" className="space-y-4 mt-4">
+          <h2 className="text-2xl font-semibold">Documentos do Curso</h2>
+          {documents.length > 0 ? (
+            <ul className="space-y-2">
+              {documents.map(doc => (
+                <li key={doc.id}>
+                  <a
+                    href={doc.documentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary hover:underline"
+                  >
+                    <FileText className="h-4 w-4" />
+                    {doc.documentName}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted-foreground">Nenhum documento disponível para este curso.</p>
+          )}
+        </TabsContent>
       </Tabs>
+
+      {customForm && selectedClassForEnrollment && (
+        <EnrollmentForm
+          form={customForm}
+          classId={selectedClassForEnrollment}
+          isOpen={isFormModalOpen}
+          onClose={() => setIsFormModalOpen(false)}
+          onEnrolled={() => setIsEnrolled(true)}
+        />
+      )}
     </div>
   );
 };

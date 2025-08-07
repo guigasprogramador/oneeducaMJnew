@@ -1,7 +1,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BookOpen, GraduationCap, LayoutDashboard, Users, Award, List, ShieldCheck, CheckCircle, MessageSquare, Menu, X } from "lucide-react";
+import { BookOpen, GraduationCap, LayoutDashboard, Users, Award, List, ShieldCheck, CheckCircle, MessageSquare, Menu, X, Megaphone, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
@@ -70,6 +70,16 @@ const AdminSidebar = () => {
       title: "Chat",
       icon: <MessageSquare size={20} />,
       href: "/admin/forum",
+    },
+    {
+      title: "Avisos",
+      icon: <Megaphone size={20} />,
+      href: "/admin/announcements",
+    },
+    {
+      title: "Calendário",
+      icon: <Calendar size={20} />,
+      href: "/calendar",
     },
   ];
   

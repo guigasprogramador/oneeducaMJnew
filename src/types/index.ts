@@ -14,6 +14,32 @@ export interface Course {
   updatedAt: string;
   isEnrolled?: boolean;
   progress?: number;
+  syllabus?: string;
+  bibliography?: string;
+}
+
+export interface CourseDocument {
+  id: string;
+  courseId: string;
+  documentName: string;
+  documentUrl: string;
+  createdAt: string;
+}
+
+export interface Class {
+  id: string;
+  courseId: string;
+  name: string;
+  instructorId?: string;
+  startDate?: string;
+  endDate?: string;
+  createdAt: string;
+  updatedAt:string;
+}
+
+export interface CoursePrerequisite {
+  courseId: string;
+  prerequisiteId: string;
 }
 
 export interface Module {
@@ -74,4 +100,97 @@ export interface Profile {
     twitter?: string;
     github?: string;
   };
+}
+
+export interface Quiz {
+  id: string;
+  courseId: string;
+  title: string;
+  questions: Question[];
+}
+
+export interface Question {
+  id: string;
+  quizId: string;
+  questionText: string;
+  questionType: string;
+  order: number;
+  answers: Answer[];
+}
+
+export interface Answer {
+  id: string;
+  questionId: string;
+  answerText: string;
+  isCorrect: boolean;
+}
+
+export interface QuizAttempt {
+  id: string;
+  quizId: string;
+  userId: string;
+  score?: number;
+  startedAt: string;
+  completedAt?: string;
+}
+
+export interface QuizAttemptAnswer {
+  id: string;
+  quizAttemptId: string;
+  questionId: string;
+  answerId?: string;
+  answerTextInput?: string;
+  isCorrect?: boolean;
+}
+
+export interface Announcement {
+  id: string;
+  courseId: string;
+  classId?: string;
+  title: string;
+  content: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  classId: string;
+  title: string;
+  description?: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+}
+
+export interface CustomForm {
+  id: string;
+  courseId: string;
+  title: string;
+  fields: FormField[];
+}
+
+export interface FormField {
+  id: string;
+  formId: string;
+  label: string;
+  fieldType: string;
+  options?: any;
+  isRequired: boolean;
+  order: number;
+}
+
+export interface FormSubmission {
+  id: string;
+  formId: string;
+  userId: string;
+  submittedAt: string;
+  answers: SubmissionAnswer[];
+}
+
+export interface SubmissionAnswer {
+  id: string;
+  submissionId: string;
+  fieldId: string;
+  answerText: string;
 }
