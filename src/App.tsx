@@ -46,6 +46,8 @@ import ProfessorModules from "./pages/professor/ProfessorModules";
 import CourseModules from "./pages/professor/CourseModules";
 import ProfessorLessons from "./pages/professor/ProfessorLessons";
 import Forum from "./pages/professor/Forum";
+import ProfessorProfile from "./pages/professor/ProfessorProfile";
+import FichaControle from "./pages/professor/FichaControle";
 import CourseApproval from "./pages/admin/CourseApproval";
 import QuizBuilder from "./pages/admin/QuizBuilder";
 import QuizResults from "./pages/admin/QuizResults";
@@ -54,6 +56,7 @@ import Calendar from "./pages/Calendar";
 import AdminClasses from "./pages/admin/AdminClasses";
 import ClassEventManager from "./pages/admin/ClassEventManager";
 import FormBuilder from "./pages/admin/FormBuilder";
+import AdminServiceProviders from "./pages/admin/AdminServiceProviders";
 import NotFound from "./pages/NotFound";
 
 // Usando o queryClient global definido em utils/queryClient.ts
@@ -125,6 +128,8 @@ const App = () => (
                 <Route path="/professor/modules" element={<ProfessorModules />} />
                 <Route path="/professor/lessons" element={<ProfessorLessons />} />
                 <Route path="/professor/forum" element={<Forum />} />
+                <Route path="/professor/profile" element={<ProfessorProfile />} />
+                <Route path="/professor/ficha-controle" element={<FichaControle />} />
               </Route>
               
               {/* Admin routes */}
@@ -148,6 +153,7 @@ const App = () => (
                 <Route path="/admin/class/:classId/events" element={<ClassEventManager />} />
                 <Route path="/admin/course/:courseId/form" element={<FormBuilder />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
+                <Route path="/admin/service-providers" element={<AdminServiceProviders />} />
               </Route>
               
               {/* 404 page */}

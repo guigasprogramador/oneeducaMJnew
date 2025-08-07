@@ -9,10 +9,18 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { User } from "@/types";
-import { School } from "lucide-react";
+import { School, MoreHorizontal } from "lucide-react";
 import CourseSelector from "./CourseSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { enrollmentService } from "@/services/enrollmentService";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface UserEnrollmentsProps {
   user: User;
@@ -23,6 +31,7 @@ interface CourseEnrollment {
   title: string;
   progress: number;
   enrolled_at: string;
+  status: 'active' | 'inactive' | 'locked' | 'cancelled' | 'withdrawn';
 }
 
 const UserEnrollments = ({ user }: UserEnrollmentsProps) => {
@@ -38,7 +47,7 @@ const UserEnrollments = ({ user }: UserEnrollmentsProps) => {
       // Buscar matrículas do usuário
       const { data: enrollmentData, error: enrollmentError } = await supabase
         .from('enrollments')
-        .select('course_id, progress, enrolled_at')
+        .select('course_id, progress, enrolled_at, status')
         .eq('user_id', user.id);
 
       if (enrollmentError) {
@@ -72,7 +81,8 @@ const UserEnrollments = ({ user }: UserEnrollmentsProps) => {
           id: enrollment.course_id,
           title: course?.title || 'Curso não encontrado',
           progress: enrollment.progress,
-          enrolled_at: enrollment.enrolled_at
+          enrolled_at: enrollment.enrolled_at,
+          status: enrollment.status || 'active'
         };
       });
 
@@ -91,6 +101,30 @@ const UserEnrollments = ({ user }: UserEnrollmentsProps) => {
 
   const handleEnrollmentComplete = () => {
     fetchEnrollments();
+  };
+
+  const handleStatusChange = async (courseId: string, status: 'active' | 'inactive' | 'locked' | 'cancelled' | 'withdrawn') => {
+    const success = await enrollmentService.updateEnrollmentStatus(user.id, courseId, status);
+    if (success) {
+      fetchEnrollments();
+    }
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'default';
+      case 'inactive':
+        return 'secondary';
+      case 'locked':
+        return 'destructive';
+      case 'cancelled':
+        return 'destructive';
+      case 'withdrawn':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
   };
 
   return (
@@ -126,6 +160,7 @@ const UserEnrollments = ({ user }: UserEnrollmentsProps) => {
                       <p className="text-sm text-muted-foreground">
                         Matriculado em: {new Date(enrollment.enrolled_at).toLocaleDateString()}
                       </p>
+                      <Badge variant={getStatusVariant(enrollment.status)}>{enrollment.status}</Badge>
                     </div>
                     <div className="flex items-center">
                       <div className="mr-4">
@@ -137,6 +172,30 @@ const UserEnrollments = ({ user }: UserEnrollmentsProps) => {
                           />
                         </div>
                       </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleStatusChange(enrollment.id, 'active')}>
+                            Ativar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(enrollment.id, 'inactive')}>
+                            Inativar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(enrollment.id, 'locked')}>
+                            Bloquear
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(enrollment.id, 'cancelled')}>
+                            Cancelar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleStatusChange(enrollment.id, 'withdrawn')}>
+                            Desistir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))}

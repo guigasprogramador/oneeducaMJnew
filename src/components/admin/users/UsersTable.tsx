@@ -83,9 +83,9 @@ const UsersTable = ({ users, isLoading, onEditUser, onDeleteUser }: UsersTablePr
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
                   <Badge
-                    variant={user.role === "admin" ? "default" : "outline"}
+                    variant={user.role === "admin" ? "default" : user.role === "professor" ? "secondary" : "outline"}
                   >
-                    {user.role === "admin" ? "Administrador" : "Aluno"}
+                    {user.role === "admin" ? "Administrador" : user.role === "professor" ? "Professor" : "Aluno"}
                   </Badge>
                 </TableCell>
                 <TableCell>

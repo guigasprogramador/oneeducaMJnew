@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BookOpen, GraduationCap, LayoutDashboard, MessageSquare, Clock, CheckCircle, Menu, X } from "lucide-react";
+import { BookOpen, GraduationCap, LayoutDashboard, MessageSquare, Clock, CheckCircle, Menu, X, User, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -54,6 +54,16 @@ export const ProfessorSidebar = () => {
       title: "Chat",
       icon: <MessageSquare size={20} />,
       href: "/professor/forum",
+    },
+    {
+      title: "Meu Perfil",
+      icon: <User size={20} />,
+      href: "/professor/profile",
+    },
+    {
+      title: "Ficha de Controle",
+      icon: <ClipboardList size={20} />,
+      href: "/professor/ficha-controle",
     },
   ];
 

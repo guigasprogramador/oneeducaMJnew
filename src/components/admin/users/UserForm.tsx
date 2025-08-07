@@ -24,8 +24,8 @@ import { AlertCircle, Eye, EyeOff } from "lucide-react";
 
 interface UserFormData {
   name: string;
-  email: string;
-  role: "admin" | "student";
+  email:string;
+  role: "admin" | "student" | "professor";
   password?: string;
 }
 
@@ -61,7 +61,7 @@ const UserForm = ({ initialData, isEditing, onSubmit }: UserFormProps) => {
     }
   };
 
-  const handleRoleChange = (value: "admin" | "student") => {
+  const handleRoleChange = (value: "admin" | "student" | "professor") => {
     setFormData((prev) => ({ ...prev, role: value }));
   };
   
@@ -189,7 +189,7 @@ const UserForm = ({ initialData, isEditing, onSubmit }: UserFormProps) => {
           <Label htmlFor="role">Função</Label>
           <Select
             value={formData.role}
-            onValueChange={(value) => handleRoleChange(value as "admin" | "student")}
+            onValueChange={(value) => handleRoleChange(value as "admin" | "student" | "professor")}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione uma função" />
@@ -197,6 +197,7 @@ const UserForm = ({ initialData, isEditing, onSubmit }: UserFormProps) => {
             <SelectContent>
               <SelectItem value="admin">Administrador</SelectItem>
               <SelectItem value="student">Aluno</SelectItem>
+              <SelectItem value="professor">Professor</SelectItem>
             </SelectContent>
           </Select>
         </div>
