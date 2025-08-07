@@ -1,5 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { QuizData, QuizQuestion, QuizResponse } from '../types/professor';
+import { uploadFile } from '@/utils/storage';
+
+// Tipo para a resposta de uma única questão, que pode ser texto ou arquivo
+type QuizSubmissionAnswer = {
+  questionId: string;
+  answer: string | File;
+};
 
 export const quizService = {
   // Criar um novo quiz para um módulo
@@ -194,7 +201,7 @@ export const quizService = {
   },
 
   // Submeter resposta do quiz
-  async submitQuizResponse(moduleId: string, userId: string, responses: QuizResponse[]): Promise<{ score: number; attemptId: string }> {
+  async submitQuizResponse(moduleId: string, userId: string, responses: QuizSubmissionAnswer[]): Promise<{ score: number; attemptId:string }> {
     try {
       // Buscar o quiz para calcular a pontuação
       const { data: module, error: quizError } = await supabase
@@ -209,30 +216,53 @@ export const quizService = {
       }
 
       const quiz = typeof module.quiz_data === 'string' ? JSON.parse(module.quiz_data) : module.quiz_data;
-
-      // Calcular pontuação
       const questions: QuizQuestion[] = quiz.questions || [];
-      let correctAnswers = 0;
 
-      responses.forEach(response => {
+      // Processar respostas, fazendo upload de arquivos se necessário
+      const processedResponses = await Promise.all(
+        responses.map(async (response) => {
+          if (response.answer instanceof File) {
+            const file = response.answer;
+            const filePath = `quiz-answers/${moduleId}/${userId}/${Date.now()}_${file.name}`;
+            const fileUrl = await uploadFile('course-files', filePath, file);
+            return {
+              questionId: response.questionId,
+              answer: fileUrl, // Salva a URL do arquivo como resposta
+              fileName: file.name,
+              fileType: file.type,
+            };
+          }
+          return {
+              questionId: response.questionId,
+              answer: response.answer,
+          };
+        })
+      );
+
+      // Calcular pontuação (apenas para questões que não são de upload)
+      let correctAnswers = 0;
+      processedResponses.forEach(response => {
         const question = questions.find(q => q.id === response.questionId);
-        if (question && question.correctAnswer === response.selectedAnswer) {
+        // Só pontua se a resposta não for uma URL (ou seja, não for de um upload)
+        if (question && question.type !== 'file_upload' && question.correctAnswer === response.answer) {
           correctAnswers++;
         }
       });
 
-      const score = Math.round((correctAnswers / questions.length) * 100);
-      const passed = score >= (quiz.passingScore || 70);
+      const nonFileUploadQuestions = questions.filter(q => q.type !== 'file_upload');
+      const score = nonFileUploadQuestions.length > 0
+        ? Math.round((correctAnswers / nonFileUploadQuestions.length) * 100)
+        : 100; // Se só houver questões de upload, a nota é 100% (ou a ser definida manualmente)
 
-      // Salvar tentativa na tabela quiz_responses (upsert para permitir retentativas)
+      // Salvar tentativa na tabela quiz_responses
       const { data: attempt, error: attemptError } = await supabase
         .from('quiz_responses')
         .upsert({
           module_id: moduleId,
           user_id: userId,
-          responses: responses,
+          responses: processedResponses, // Salva as respostas processadas (com URLs)
           score: score,
-          max_score: questions.length * 100,
+          max_score: 100,
           completed_at: new Date().toISOString()
         }, {
           onConflict: 'user_id,module_id'

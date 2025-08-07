@@ -194,3 +194,28 @@ export interface SubmissionAnswer {
   fieldId: string;
   answerText: string;
 }
+
+export interface AcademicWork {
+  id: string;
+  classId: string;
+  userId: string;
+  title: string;
+  documentUrl: string;
+  documentType?: string;
+  fileSize?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GeneralDocument {
+  id: string;
+  title: string;
+  description?: string;
+  documentUrl: string;
+  documentType?: string;
+  category?: string;
+  fileSize?: number;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}

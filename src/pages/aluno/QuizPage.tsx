@@ -22,7 +22,7 @@ const QuizPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [responses, setResponses] = useState<Record<string, string>>({});
+  const [responses, setResponses] = useState<Record<string, string | File>>({});
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quizResult, setQuizResult] = useState<{ score: number } | null>(null);
@@ -90,11 +90,17 @@ const QuizPage = () => {
   };
   
   // Atualizar resposta
-  const handleResponseChange = (questionId: string, answer: string) => {
+  const handleResponseChange = (questionId: string, answer: string | File) => {
     setResponses(prev => ({
       ...prev,
       [questionId]: answer
     }));
+  };
+
+  const handleFileResponseChange = (questionId: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+        handleResponseChange(questionId, event.target.files[0]);
+    }
   };
   
   // Navegar para a próxima pergunta
@@ -113,23 +119,24 @@ const QuizPage = () => {
   
   // Submeter o quiz
   const handleSubmitQuiz = async () => {
-    if (!quiz || !user) return;
+    if (!quiz || !user || !moduleId) return;
     
     // Verificar se todas as perguntas foram respondidas
     const answeredQuestions = Object.keys(responses).length;
     if (answeredQuestions < quiz.questions.length) {
       const unansweredCount = quiz.questions.length - answeredQuestions;
-      toast.warning(`Você ainda não respondeu ${unansweredCount} ${unansweredCount === 1 ? 'pergunta' : 'perguntas'}. Tem certeza que deseja enviar?`);
-      return;
+      if (!window.confirm(`Você ainda não respondeu ${unansweredCount} ${unansweredCount === 1 ? 'pergunta' : 'perguntas'}. Tem certeza que deseja enviar?`)) {
+        return;
+      }
     }
     
     try {
       setIsSubmitting(true);
       
       // Preparar as respostas no formato esperado pelo serviço
-      const quizResponses: QuizResponse[] = Object.entries(responses).map(([questionId, selectedAnswer]) => ({
+      const quizResponses = Object.entries(responses).map(([questionId, answer]) => ({
         questionId,
-        selectedAnswer
+        answer
       }));
       
       // Submeter as respostas
@@ -340,6 +347,31 @@ const QuizPage = () => {
                   ))}
                 </div>
               </RadioGroup>
+            )}
+
+            {currentQuestionData.type === 'short_answer' && (
+                <Input
+                    type="text"
+                    value={(responses[currentQuestionData.id] as string) || ''}
+                    onChange={(e) => handleResponseChange(currentQuestionData.id, e.target.value)}
+                    placeholder="Digite sua resposta aqui"
+                />
+            )}
+
+            {currentQuestionData.type === 'file_upload' && (
+              <div>
+                <Label htmlFor="file-upload-question">Envie seu arquivo</Label>
+                <Input
+                  id="file-upload-question"
+                  type="file"
+                  onChange={(e) => handleFileResponseChange(currentQuestionData.id, e)}
+                />
+                {responses[currentQuestionData.id] && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                        Arquivo selecionado: {(responses[currentQuestionData.id] as File).name}
+                    </p>
+                )}
+              </div>
             )}
             
             {currentQuestionData.type === 'true_false' && (

@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { CourseDocuments } from "./CourseDocuments";
 
 interface CourseFormProps {
   formData: {
@@ -136,6 +137,8 @@ const CourseForm = ({
               rows={5}
             />
           </div>
+
+          {editingCourseId && <CourseDocuments courseId={editingCourseId} />}
         </div>
 
         <DialogFooter>
