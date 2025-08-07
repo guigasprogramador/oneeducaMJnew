@@ -7,18 +7,36 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { Certificate } from "@/types";
 import { toast } from "sonner";
-import { Award, Download, Eye, Search, Share2, QrCode } from "lucide-react";
+import { Award, Download, Eye, Search, Share2, QrCode, CloudArrowDown } from "lucide-react";
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { moodleService, MoodleCertificate } from "@/services/moodleService";
+import { CloudArrowDown } from "lucide-react";
 
 const MeusCertificados = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [moodleCertificates, setMoodleCertificates] = useState<MoodleCertificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMoodleLoading, setIsMoodleLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleMoodleSync = async () => {
+    if (!user) return;
+    setIsMoodleLoading(true);
+    try {
+      const moodleCerts = await moodleService.getMoodleCertificates(user.id);
+      setMoodleCertificates(moodleCerts);
+      toast.success("Certificados do Moodle importados (simulação).");
+    } catch (error) {
+      toast.error("Falha ao buscar certificados do Moodle.");
+    } finally {
+      setIsMoodleLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchCertificates = async () => {
@@ -159,20 +177,53 @@ const MeusCertificados = () => {
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl font-bold">Meus Certificados</h1>
-        
-        <div className="w-full md:w-64">
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por curso..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={handleMoodleSync} disabled={isMoodleLoading}>
+            <CloudArrowDown className="h-4 w-4 mr-2" />
+            {isMoodleLoading ? "Sincronizando..." : "Importar do Moodle"}
+          </Button>
+          <div className="w-full md:w-64">
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por curso..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
         </div>
       </div>
       
+      {moodleCertificates.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Certificados do Moodle (Simulação)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Curso</TableHead>
+                  <TableHead>Data de Emissão</TableHead>
+                  <TableHead>Nota</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {moodleCertificates.map((cert) => (
+                  <TableRow key={cert.moodleCourseId}>
+                    <TableCell className="font-medium">{cert.courseName}</TableCell>
+                    <TableCell>{new Date(cert.issueDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{cert.grade || 'N/A'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center p-12">
           <p>Carregando seus certificados...</p>

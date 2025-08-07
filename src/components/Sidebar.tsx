@@ -1,7 +1,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BookOpen, GraduationCap, LayoutDashboard, Award, Menu, X, Calendar } from "lucide-react";
+import { BookOpen, GraduationCap, LayoutDashboard, Award, Menu, X, Calendar, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
@@ -50,6 +50,11 @@ const Sidebar = () => {
       title: "Calendário",
       icon: <Calendar size={20} />,
       href: "/calendar",
+    },
+    {
+      title: "Meus Documentos",
+      icon: <FileText size={20} />,
+      href: "/aluno/documentos",
     },
   ];
   

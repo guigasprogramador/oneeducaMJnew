@@ -23,6 +23,8 @@ import CourseContent from "./pages/CourseContent";
 import Certificate from "./pages/Certificate";
 import CoursePlayer from "./pages/aluno/CoursePlayer";
 import MeusCertificados from "./pages/aluno/MeusCertificados";
+import MyDocuments from "./pages/aluno/MyDocuments";
+import VerifyDocument from "./pages/VerifyDocument";
 import QuizPage from "./pages/aluno/QuizPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCourses from "./pages/admin/AdminCourses";
@@ -98,6 +100,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/verify-document" element={<VerifyDocument />} />
               
               {/* Protected student routes */}
               <Route element={<ProtectedRoute />}>
@@ -110,6 +113,7 @@ const App = () => (
                 <Route path="/aluno/certificados" element={<MeusCertificados />} />
                 <Route path="/certificates/:certificateId" element={<Certificate />} />
                 <Route path="/aluno/certificado/:certificateId" element={<Certificate />} />
+                <Route path="/aluno/documentos" element={<MyDocuments />} />
                 <Route path="/calendar" element={<Calendar />} />
               </Route>
               
