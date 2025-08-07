@@ -147,6 +147,7 @@ const App = () => (
                 <Route path="/admin/course/:courseId/classes" element={<AdminClasses />} />
                 <Route path="/admin/class/:classId/events" element={<ClassEventManager />} />
                 <Route path="/admin/course/:courseId/form" element={<FormBuilder />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
               </Route>
               
               {/* 404 page */}
