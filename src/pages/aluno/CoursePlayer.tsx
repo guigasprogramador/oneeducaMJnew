@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { moduleService, lessonService, lessonProgressService } from "@/services";
+import { moduleService, lessonService, lessonProgressService, documentService } from "@/services";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Lesson, Module } from "@/types";
+import { Lesson, Module, CourseDocument } from "@/types";
 import VideoPlayer from "@/components/VideoPlayer";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Award, ChevronRight, FileText, ClipboardCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AcademicWorkSubmission } from "@/components/aluno/AcademicWorkSubmission";
 
 // Interfaces estendidas para incluir quizzes e anexos
 interface LessonAttachment {
@@ -66,6 +67,8 @@ const CoursePlayer = () => {
   const [certificateId, setCertificateId] = useState<string | null>(null);
   const [courseCompletedRecently, setCourseCompletedRecently] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [courseDocuments, setCourseDocuments] = useState<CourseDocument[]>([]);
+  const [classId, setClassId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchModulesAndLessons = async () => {
@@ -89,6 +92,15 @@ const CoursePlayer = () => {
           return;
         }
         setCourseName(courseData.title);
+
+        // Buscar documentos do curso
+        try {
+            const docs = await documentService.getDocumentsByCourse(id);
+            setCourseDocuments(docs);
+        } catch (docError) {
+            console.error("Erro ao buscar documentos do curso:", docError);
+            // Não bloquear o carregamento do curso por causa disso
+        }
         
         // Obter usuário autenticado
         const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -100,6 +112,26 @@ const CoursePlayer = () => {
         
         // Armazenar o ID do usuário para uso posterior
         setUserId(user.id);
+
+        // Buscar a turma do usuário para este curso
+        const { data: classes, error: classesError } = await supabase
+            .from('classes')
+            .select('id')
+            .eq('course_id', id);
+
+        if (!classesError && classes.length > 0) {
+            const classIds = classes.map(c => c.id);
+            const { data: enrollment, error: enrollmentError } = await supabase
+                .from('enrollments')
+                .select('class_id')
+                .eq('user_id', user.id)
+                .in('class_id', classIds)
+                .single();
+
+            if (!enrollmentError && enrollment) {
+                setClassId(enrollment.class_id);
+            }
+        }
         
         // Buscar módulos e aulas
         const mods = await moduleService.getModulesByCourseId(id);
@@ -647,6 +679,37 @@ const CoursePlayer = () => {
           
           {/* Conteúdo da aula */}
           <div className="md:col-span-2">
+            {courseDocuments.length > 0 && (
+                <Card className="mb-6">
+                    <div className="p-4">
+                        <h2 className="text-xl font-semibold mb-2">Documentos do Curso</h2>
+                        <div className="space-y-2">
+                            {courseDocuments.map((doc) => (
+                                <div key={doc.id} className="flex items-center p-2 border rounded hover:bg-muted">
+                                    <FileText className="h-5 w-5 mr-2 text-muted-foreground" />
+                                    <a
+                                        href={doc.documentUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:underline flex-1"
+                                    >
+                                        {doc.documentName}
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Card>
+            )}
+
+            {classId && userId && (
+                <Card className="mb-6">
+                    <div className="p-4">
+                        <AcademicWorkSubmission classId={classId} userId={userId} />
+                    </div>
+                </Card>
+            )}
+
             {selectedLesson ? (
               <div className="space-y-4">
                 <Card>
