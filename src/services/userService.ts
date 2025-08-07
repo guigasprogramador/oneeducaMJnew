@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 interface UserFormData {
   name: string;
   email: string;
-  role: 'admin' | 'student';
+  role: 'admin' | 'student' | 'professor';
   password?: string;
 }
 
