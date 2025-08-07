@@ -21,6 +21,7 @@ const getProfiles = async (): Promise<Profile[]> => {
       company: profile.company || '',
       location: profile.location || '',
       website: profile.website || '',
+      cpf: profile.cpf || '',
       social: {}
     })) || [];
   } catch (error) {
@@ -37,7 +38,8 @@ const createProfile = async (profileData: {
   jobTitle?: string,
   company?: string,
   location?: string,
-  website?: string
+  website?: string,
+  cpf?: string
 }): Promise<Profile> => {
   try {
     const { error } = await supabase
@@ -50,6 +52,7 @@ const createProfile = async (profileData: {
         company: profileData.company,
         location: profileData.location,
         website: profileData.website,
+        cpf: profileData.cpf,
         updated_at: new Date().toISOString()
       });
     
@@ -80,7 +83,8 @@ const updateProfile = async (profileId: string, profileData: {
   jobTitle?: string,
   company?: string,
   location?: string,
-  website?: string
+  website?: string,
+  cpf?: string
 }): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -92,6 +96,7 @@ const updateProfile = async (profileId: string, profileData: {
         company: profileData.company,
         location: profileData.location,
         website: profileData.website,
+        cpf: profileData.cpf,
         updated_at: new Date().toISOString()
       })
       .eq('id', profileId);

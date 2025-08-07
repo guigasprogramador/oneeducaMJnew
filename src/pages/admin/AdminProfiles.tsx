@@ -49,6 +49,7 @@ interface ProfileFormData {
   company?: string;
   location?: string;
   website?: string;
+  cpf?: string;
 }
 
 const defaultFormData: ProfileFormData = {
@@ -59,6 +60,7 @@ const defaultFormData: ProfileFormData = {
   company: "",
   location: "",
   website: "",
+  cpf: "",
 };
 
 const AdminProfiles = () => {
@@ -114,6 +116,7 @@ const AdminProfiles = () => {
       company: profile.company || "",
       location: profile.location || "",
       website: profile.website || "",
+      cpf: profile.cpf || "",
     });
     setEditingProfileId(profile.id);
     setIsDialogOpen(true);
@@ -224,16 +227,28 @@ const AdminProfiles = () => {
                   </Select>
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Nome Completo</Label>
-                <Input
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  placeholder="Nome completo"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Nome Completo</Label>
+                  <Input
+                    id="fullName"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    placeholder="Nome completo"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="cpf">CPF</Label>
+                  <Input
+                    id="cpf"
+                    name="cpf"
+                    value={formData.cpf}
+                    onChange={handleInputChange}
+                    placeholder="000.000.000-00"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bio">Biografia</Label>

@@ -95,6 +95,7 @@ export interface Profile {
   location?: string;
   avatar?: string;
   website?: string;
+  cpf?: string;
   social?: {
     linkedin?: string;
     twitter?: string;
