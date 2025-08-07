@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import courseService from '@/services/courseService';
+import { courseService } from '@/services/courseService';
 
 interface Course {
   id: string;
