@@ -115,11 +115,18 @@ export const documentService = {
 
   /**
    * Busca documentos gerais com base em filtros.
-   * @param params - Parâmetros de filtro e ordenação.
+   * @param params - Parâmetros de filtro, ordenação e status.
    * @returns Uma lista de documentos gerais.
    */
-  async getGeneralDocuments(params?: { category?: string; sortBy?: 'created_at' | 'title' }): Promise<GeneralDocument[]> {
+  async getGeneralDocuments(params?: {
+    category?: string;
+    sortBy?: 'created_at' | 'title';
+    status?: 'active' | 'archived';
+  }): Promise<GeneralDocument[]> {
     let query = supabase.from('general_documents').select('*');
+
+    // Filtra por status, padrão é 'active'
+    query = query.eq('status', params?.status || 'active');
 
     if (params?.category) {
       query = query.eq('category', params.category);
@@ -146,10 +153,66 @@ export const documentService = {
         documentType: doc.document_type,
         category: doc.category,
         fileSize: doc.file_size,
+        status: doc.status,
         createdBy: doc.created_by,
         createdAt: doc.created_at,
         updatedAt: doc.updated_at,
     }));
+  },
+
+  /**
+   * Atualiza os metadados de um documento geral.
+   * @param documentId - O ID do documento a ser atualizado.
+   * @param metadata - Os novos metadados do documento.
+   * @returns O objeto do documento geral atualizado.
+   */
+  async updateGeneralDocument(documentId: string, metadata: { title?: string; description?: string; category?: string }): Promise<GeneralDocument> {
+    if (!documentId) throw new Error('ID do documento é obrigatório');
+
+    const { data, error } = await supabase
+      .from('general_documents')
+      .update(metadata)
+      .eq('id', documentId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao atualizar documento geral:', error);
+      throw new Error('Falha ao atualizar informações do documento.');
+    }
+
+    return {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        documentUrl: data.document_url,
+        documentType: data.document_type,
+        category: data.category,
+        fileSize: data.file_size,
+        status: data.status,
+        createdBy: data.created_by,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+    };
+  },
+
+  /**
+   * Altera o status de um documento geral (ex: arquivar/reativar).
+   * @param documentId - O ID do documento.
+   * @param status - O novo status ('active' or 'archived').
+   */
+  async setDocumentStatus(documentId: string, status: 'active' | 'archived'): Promise<void> {
+    if (!documentId || !status) throw new Error('ID do documento e status são obrigatórios.');
+
+    const { error } = await supabase
+      .from('general_documents')
+      .update({ status })
+      .eq('id', documentId);
+
+    if (error) {
+      console.error(`Erro ao alterar status do documento para ${status}:`, error);
+      throw new Error('Falha ao alterar o status do documento.');
+    }
   },
 
   /**
