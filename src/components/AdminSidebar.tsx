@@ -1,7 +1,7 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BookOpen, GraduationCap, LayoutDashboard, Users, Award, List, ShieldCheck, CheckCircle, MessageSquare, Menu, X, Megaphone, Calendar, Briefcase } from "lucide-react";
+import { BookOpen, GraduationCap, LayoutDashboard, Users, Award, List, ShieldCheck, CheckCircle, MessageSquare, Menu, X, Megaphone, Calendar, Briefcase, BarChart } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
@@ -30,6 +30,11 @@ const AdminSidebar = () => {
       title: "Dashboard",
       icon: <LayoutDashboard size={20} />,
       href: "/admin/dashboard",
+    },
+    {
+      title: "Relatórios",
+      icon: <BarChart size={20} />,
+      href: "/admin/reports",
     },
     {
       title: "Cursos",

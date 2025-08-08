@@ -1,4 +1,4 @@
-import { ReportKey } from '../ReportFilters';
+import { ReportKey } from '@/components/admin/ReportFilters';
 import { ReportDataTable, ColumnDef } from './ReportDataTable';
 import { ReportChart } from './ReportChart';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -102,12 +102,32 @@ export function ReportDisplay({ reportKey, data, isLoading, error }: ReportDispl
       case 'dropouts':
       case 'near_completion':
       case 'attendance_list':
-        const studentListColumns: ColumnDef<any>[] = [
-            { accessorKey: 'user_name', header: 'Nome do Aluno' },
-            { accessorKey: 'enrollment_status', header: 'Status' },
-            { accessorKey: 'progress', header: 'Progresso (%)' },
+        const attendanceColumns: ColumnDef<any>[] = [
+          { accessorKey: 'user_name', header: 'Nome do Aluno' },
+          { accessorKey: 'present_count', header: 'Presenças' },
+          { accessorKey: 'absent_count', header: 'Faltas' },
+          { accessorKey: 'justified_absence_count', header: 'Faltas Justificadas' },
+          {
+            accessorKey: 'attendance_rate',
+            header: 'Taxa de Frequência (%)',
+            cell: ({ row }) => `${parseFloat(row.original.attendance_rate).toFixed(2)}%`,
+          },
         ];
-        return <ReportDataTable columns={studentListColumns} data={data} />;
+        return <ReportDataTable columns={attendanceColumns} data={data} />;
+
+      case 'document_lifecycle':
+      case 'document_issuance_summary':
+        const docColumns: ColumnDef<any>[] = [
+          { accessorKey: 'document_type_br', header: 'Tipo de Documento' },
+          { accessorKey: 'issuance_count', header: 'Quantidade Emitida' },
+        ];
+        const docChartData = data.map((d: any) => ({ name: d.document_type_br, value: Number(d.issuance_count) }));
+        return (
+          <div className="space-y-6">
+            <ReportChart data={docChartData} chartType="pie" title="Documentos Emitidos por Tipo" categoryKey="name" valueKey="value" />
+            <ReportDataTable columns={docColumns} data={data} />
+          </div>
+        );
 
       default:
         return <p>Visualização para este tipo de relatório ainda não implementada.</p>;

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { formService } from '@/services/formService';
-import { enrollmentService } from '@/services/courses/enrollmentService';
+import { enrollClass } from '@/services/courses/enrollmentService';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -37,7 +37,7 @@ const EnrollmentForm = ({ form, classId, isOpen, onClose, onEnrolled }: Enrollme
 
     try {
       await formService.submitForm({ formId: form.id, userId: user.id, answers: submissionAnswers });
-      const result = await enrollmentService.enrollClass(classId, user.id);
+      const result = await enrollClass(classId, user.id);
       if (result.success) {
         toast.success('Enrolled successfully!');
         onEnrolled();
