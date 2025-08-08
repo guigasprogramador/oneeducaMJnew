@@ -136,8 +136,184 @@ const financialService = {
     }
   },
 
-  // Placeholder for Scholarship and ProfileScholarship functions
-  // I will add them in a future step if needed
+  // == SCHOLARSHIPS ==
+
+  async getScholarships(): Promise<Scholarship[]> {
+    try {
+      const { data, error } = await supabase
+        .from('scholarships')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      return data.map(s => ({
+        id: s.id,
+        name: s.name,
+        description: s.description,
+        discountPercentage: s.discount_percentage,
+        createdAt: s.created_at,
+        updatedAt: s.updated_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching scholarships:', error);
+      throw new Error('Failed to fetch scholarships.');
+    }
+  },
+
+  async createScholarship(scholarshipData: Omit<Scholarship, 'id' | 'createdAt' | 'updatedAt'>): Promise<Scholarship> {
+    try {
+      const { data, error } = await supabase
+        .from('scholarships')
+        .insert({
+          name: scholarshipData.name,
+          description: scholarshipData.description,
+          discount_percentage: scholarshipData.discountPercentage,
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      return {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        discountPercentage: data.discount_percentage,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+      };
+    } catch (error) {
+      console.error('Error creating scholarship:', error);
+      throw new Error('Failed to create scholarship.');
+    }
+  },
+
+  async deleteScholarship(id: string): Promise<void> {
+    try {
+      await supabase.from('profile_scholarships').delete().eq('scholarship_id', id);
+      const { error } = await supabase
+        .from('scholarships')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting scholarship:', error);
+      throw new Error('Failed to delete scholarship.');
+    }
+  },
+
+  // == PROFILE SCHOLARSHIPS ==
+
+  async getProfileScholarships(): Promise<(ProfileScholarship & { profiles: { name: string }, scholarships: { name: string }})[]> {
+    try {
+        const { data, error } = await supabase
+            .from('profile_scholarships')
+            .select('*, profiles(name), scholarships(name)');
+
+        if (error) throw error;
+
+        return data.map(ps => ({
+            id: ps.id,
+            profileId: ps.profile_id,
+            scholarshipId: ps.scholarship_id,
+            startDate: ps.start_date,
+            endDate: ps.end_date,
+            createdAt: ps.created_at,
+            profiles: ps.profiles,
+            scholarships: ps.scholarships,
+        }));
+    } catch (error) {
+        console.error('Error fetching profile scholarships:', error);
+        throw new Error('Failed to fetch profile scholarships.');
+    }
+  },
+
+  async assignScholarshipToProfile(assignment: Omit<ProfileScholarship, 'id' | 'createdAt'>): Promise<ProfileScholarship> {
+    try {
+        const { data, error } = await supabase
+            .from('profile_scholarships')
+            .insert({
+                profile_id: assignment.profileId,
+                scholarship_id: assignment.scholarshipId,
+                start_date: assignment.startDate,
+                end_date: assignment.endDate,
+            })
+            .select('*')
+            .single();
+
+        if (error) throw error;
+
+        return {
+            id: data.id,
+            profileId: data.profile_id,
+            scholarshipId: data.scholarship_id,
+            startDate: data.start_date,
+            endDate: data.end_date,
+            createdAt: data.created_at,
+        };
+    } catch (error) {
+        console.error('Error assigning scholarship:', error);
+        throw new Error('Failed to assign scholarship.');
+    }
+  },
+
+  async removeScholarshipFromProfile(assignmentId: string): Promise<void> {
+      try {
+          const { error } = await supabase
+              .from('profile_scholarships')
+              .delete()
+              .eq('id', assignmentId);
+
+          if (error) throw error;
+      } catch (error) {
+          console.error('Error removing scholarship assignment:', error);
+          throw new Error('Failed to remove scholarship assignment.');
+      }
+  },
+
+  // == BATCH OPERATIONS ==
+
+  async createBatchTransactions(transactions: NewFinancialTransaction[]): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('financial_transactions')
+        .insert(transactions.map(t => ({
+            description: t.description,
+            amount: t.amount,
+            type: t.type,
+            status: t.status,
+            due_date: t.dueDate,
+            paid_at: t.paidAt,
+            profile_id: t.profileId,
+            provider_id: t.providerId,
+        })));
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error creating batch transactions:', error);
+      throw new Error('Failed to create batch transactions.');
+    }
+  },
+
+  async assignBatchScholarships(assignments: Omit<ProfileScholarship, 'id' | 'createdAt'>[]): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('profile_scholarships')
+        .insert(assignments.map(a => ({
+          profile_id: a.profileId,
+          scholarship_id: a.scholarshipId,
+          start_date: a.startDate,
+          end_date: a.endDate,
+        })));
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error assigning batch scholarships:', error);
+      throw new Error('Failed to assign batch scholarships.');
+    }
+  }
 };
 
 export default financialService;
