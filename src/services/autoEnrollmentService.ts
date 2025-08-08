@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { enrollmentService, courseService } from './api';
+import { courseService } from './api';
 
 /**
  * Service to automatically enroll users in classes.
@@ -45,7 +45,7 @@ export const autoEnrollmentService = {
             .maybeSingle();
 
           if (!existing) {
-            const result = await enrollmentService.enrollClass(classToEnroll.id, userId);
+            const result = await courseService.enrollClass(classToEnroll.id, userId);
             if (result.success) {
               successfulEnrollments.push(classToEnroll.id);
             }
@@ -104,7 +104,7 @@ export const autoEnrollmentService = {
 
       const successfulEnrollments: string[] = [];
       for (const user of usersToEnroll) {
-        const result = await enrollmentService.enrollClass(classToEnroll.id, user.id);
+        const result = await courseService.enrollClass(classToEnroll.id, user.id);
         if (result.success) {
           successfulEnrollments.push(user.id);
         }

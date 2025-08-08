@@ -13,7 +13,7 @@ import QRCode from "qrcode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { moodleService, MoodleCertificate } from "@/services/moodleService";
-import { CloudArrowDown } from "lucide-react";
+import { DownloadCloud } from "lucide-react";
 
 const MeusCertificados = () => {
   const { user } = useAuth();

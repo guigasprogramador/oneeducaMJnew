@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -60,6 +59,7 @@ import ClassEventManager from "./pages/admin/ClassEventManager";
 import FormBuilder from "./pages/admin/FormBuilder";
 import AdminServiceProviders from "./pages/admin/AdminServiceProviders";
 import AdminFinancial from "./pages/admin/AdminFinancial";
+import AdminReports from "./pages/admin/AdminReports";
 import NotFound from "./pages/NotFound";
 
 // Usando o queryClient global definido em utils/queryClient.ts
