@@ -8,6 +8,7 @@ export { lessonProgressService } from './lessonProgressService';
 export { certificateService } from './certificateService';
 export { profileService } from './profileService';
 export { userService } from './userService';
+export { documentService } from './documentService';
 
 // Serviços de integração
 export { integrationService } from './integrationService';

@@ -1,8 +1,8 @@
 // Main API file that re-exports all services
 
 import * as courseQueries from './courses/courseQueries';
-import { enrollmentService } from './courses/enrollmentService';
-import { courseAdminService } from './courses/courseAdminService';
+import * as enrollmentService from './courses/enrollmentService';
+import * as courseAdminService from './courses/courseAdminService';
 export { moduleService } from './moduleService';
 export { lessonService } from './lessonService';
 export { certificateService } from './certificateService';

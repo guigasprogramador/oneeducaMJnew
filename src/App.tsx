@@ -59,6 +59,7 @@ import AdminClasses from "./pages/admin/AdminClasses";
 import ClassEventManager from "./pages/admin/ClassEventManager";
 import FormBuilder from "./pages/admin/FormBuilder";
 import AdminServiceProviders from "./pages/admin/AdminServiceProviders";
+import AdminReports from "./pages/admin/AdminReports";
 import NotFound from "./pages/NotFound";
 
 // Usando o queryClient global definido em utils/queryClient.ts
@@ -156,6 +157,7 @@ const App = () => (
                 <Route path="/admin/course/:courseId/classes" element={<AdminClasses />} />
                 <Route path="/admin/class/:classId/events" element={<ClassEventManager />} />
                 <Route path="/admin/course/:courseId/form" element={<FormBuilder />} />
+                <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/service-providers" element={<AdminServiceProviders />} />
               </Route>
