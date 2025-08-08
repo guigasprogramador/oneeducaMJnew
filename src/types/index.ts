@@ -176,7 +176,7 @@ export interface FormField {
   formId: string;
   label: string;
   fieldType: string;
-  options?: any;
+  options?: unknown;
   isRequired: boolean;
   order: number;
 }
@@ -216,6 +216,7 @@ export interface GeneralDocument {
   documentType?: string;
   category?: string;
   fileSize?: number;
+  status: 'active' | 'archived';
   createdBy?: string;
   createdAt: string;
   updatedAt: string;
