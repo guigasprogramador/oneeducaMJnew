@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,6 +58,7 @@ import AdminClasses from "./pages/admin/AdminClasses";
 import ClassEventManager from "./pages/admin/ClassEventManager";
 import FormBuilder from "./pages/admin/FormBuilder";
 import AdminServiceProviders from "./pages/admin/AdminServiceProviders";
+import AdminFinancial from "./pages/admin/AdminFinancial";
 import AdminReports from "./pages/admin/AdminReports";
 import NotFound from "./pages/NotFound";
 
@@ -158,8 +158,8 @@ const App = () => (
                 <Route path="/admin/class/:classId/events" element={<ClassEventManager />} />
                 <Route path="/admin/course/:courseId/form" element={<FormBuilder />} />
                 <Route path="/admin/reports" element={<AdminReports />} />
-                <Route path="/admin/reports" element={<AdminReports />} />
                 <Route path="/admin/service-providers" element={<AdminServiceProviders />} />
+                <Route path="/admin/financial" element={<AdminFinancial />} />
               </Route>
               
               {/* 404 page */}
